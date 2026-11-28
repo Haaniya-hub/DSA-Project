@@ -5,7 +5,7 @@
 using namespace std;
 
 //======================================================
-//MODULE 2: PATIENT MANAGEMENT ( SINGLY LINKED LIST)
+//MODULE 3: PATIENT MANAGEMENT ( SINGLY LINKED LIST)
 //======================================================
 
 //Node structure representing a single patient in the singly linked list 
@@ -332,3 +332,363 @@ cout <<" Invalid choice ! Try again \n ";
 
 }while (choice != 0);
 }
+
+//=====================================================
+MODULE 2: APPOINTMENT MANAGEMENT (QUEUE / LINKED LIST)
+//=====================================================
+
+//Node structure storing appointment details along with linked patient & doctor info
+struct Appointment {
+       int appointmentID;
+       int patientID;
+       string patientName;
+       string patientDisease;
+       int doctorID;
+       string doctorSpecialization;
+       string day;
+       string time;
+       double fee;
+       Appointment* next; //Pointer to next appointment in FIFO queue
+
+// Constructor to intialize all appointment fields 
+Appointment(int appId, int pId, string pNamee, string pDisease, int dId, string dSpec, string appDay, string appTime, double appFee) {
+       appointmentID = appId;
+       patientID = pId;
+       patientName = pNmae;
+       patientDisease = pDisease;
+       doctorID = dId;
+       doctorSpecialization = dSpec;
+       day = appDay;
+       time = appTime;
+       fee = appFee;
+       next = NULL;
+}
+};
+
+// Manages appointments using a FIFO Linked Queue 
+class AppointmentManagement{
+private:
+       Appointment* front;   //Front of the queue 
+       Appointment* rear;    //Rear of the queue
+       int nextAppointmentID; //Auto incrementing appointment ID starting at 101
+
+// Prints formatted details of a single appointment node
+void printAppointmentRecord(const Appointment* current) const{
+       cout<<"\n App ID:" <<current ->appointmentID; 
+       cout<<"\n Patient ID:" <<current ->patientID;
+       cout<<"\n Patient Name:" <<current ->patientName;
+       cout<<"\n Disease:" << current ->patientDisease;
+       cout<<"\n Doctor ID:" << current ->doctorID;
+       cout<<"\n Specialization:" <<current ->doctorSpecialization;
+       cout<<"\n Day:" <<current ->day;
+       cout<<"\n Time:" <<current ->time;
+       cout<<"\n Fee:" <<current ->fee;
+       cout<<"\n---------------------\n";
+}
+
+public:
+// Initializes an empty appointment queue
+
+AppointmentManagement() {
+       front = NULL;
+       rear = NULL;
+       nextAppointmentID = 101;
+}
+
+//Frees all dynamically allocated appointment nodes 
+~AppointmentManagement() {
+       while(front!=NULL) {
+       Appointment* temp = front;
+       front = front ->next;
+       delete temp;
+}
+       rear = NULL;
+}
+
+// Books (enqueues) a new appointment after verifying patient and doctor IDs 
+void insertAppointment(PatientLinkedList* patientList = NULL, DoctorManagement* doctorList = NULL) {
+       int pId, dId;
+       string day, time;
+       
+// Ensure at least one doctor exists before booking 
+if(doctorList == NULL || doctorList ->isEmpty()) {
+       cout<<"\n No doctors available! Please add a doctor first. \n";
+       return;
+}
+       cout<<"\n Enter Patient ID:";
+       cin>> pId;
+       if(cin.fail()) {
+       clearInvalidInput();
+       cout<<"\n Invalid Patient ID! \n";
+       return;
+}
+// Fetch patient record automatically using patient ID
+Patient* pat = (patientList != NULL) ? patientList ->searchPatient(pId) : NULL;
+if(pat == NULL) {
+       cout<< " Patient ID" <<pId<< "does not exist. Add the Patient first. \n ";
+       return;
+}
+
+//show available doctors so user can pick a Doctor ID
+doctorList ->displayDoctors();
+
+cout<<" Enter Doctor ID:";
+cin>> dId;
+if(cin.fail()) {
+        clearInvalidInput();
+        cout<<"\n Invalid Doctor ID! \n";
+        return;
+}
+// Fetch doctor record automatically using Doctor ID
+Doctor* doc = doctorList->findDoctor(dId);
+if(doc == NULL) {
+        cout<<" Doctor ID" << dId <<" does not exist. Add the doctor first. \n";
+        return;
+}
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+cout<<" Enter Day:";
+getline(cin, day);
+
+cout<<" Enter Time:";
+getline(cin, time);
+
+// Pull patient and doctor attributes for the appointment record 
+string pName = pat->name;
+string pDisease = pat->disease;
+string dSpec = doc->specialization;
+double appFee = doc->fee;
+
+Appointment* newAppointment = new Appointment(
+        nextAppointmentID++,
+        pId,
+        pName,
+        pDisease,
+        dId,
+        dSpec,
+        day,
+        time,
+        appFee,
+);
+
+// Enqueue at rear
+if (front == NULL) {
+        front = rear = newAppointment;
+} else 
+{
+        rear-> next = newAppointment;
+        rear = newAppointment;
+}
+        cout<< "\n Appointment Added Successfully! Auto ID:"<<newAppointment->appointmentID <<"\n";
+}
+// Searches appointments by Appointment ID or Patient ID
+void searchAppointment() const {
+        int choice, id;
+
+        cout<< "\n Search by:\n 1. Appointment ID\n2. Patient ID\n Enter Choice:";
+        cin>> choice;
+
+        if(cin.fail()) {
+        clearInvalidInput();
+        cout<< "\n Invalid search choice! \n";
+        return;
+}
+
+Appointment* current = front;
+bool found = false;
+
+if( choice ==  1) {
+        cout<<" Enter Appointment ID to Search:";
+        cin>>id;
+if(cin.fail()) {
+        clearInvalidInput();
+        cout<<"\n Invalid ID! \n";
+        return;
+}
+while(current!= NULL) {
+        if(current->appointmentID == id) {
+        cout<<"\n Appointment Found!\n";
+        printAppointmentRecord(current);
+        found= true;
+        break;
+}
+        current= current->next;
+}
+} else if (choice == 2) {
+        cout<<" Enter Patient ID to Search:";
+        cin>>id;
+        if(cin.fail()) {
+        clearInvalidInput();
+        cout<< "\n Invalid ID!\n";
+        return;
+}
+While(current != NULL) {
+        if(current-> patientID == id) {
+        cout<<"\n Appointment Found!\n";
+        found = true;
+}
+        current= current->next;
+}
+} else {
+        cout<<"\n Invalid search choice! \n";
+        return;
+}
+if(!found) {
+        cout<<"\n No matching appointment found!\n";
+}
+}
+// Updates an existing appointment's linked patient, doctor, day, and time
+void updateAppointment(PatientLinkedList* patientList = NULL, DoctorManagement* doctorList = NULL)
+{
+int id;
+cout<<"\n Enter Appointment ID to Update:";
+cin>>id;
+if(cin.fail()) {
+clearInvalidInput();
+cout<<"\n Invalid ID! \n";
+return;
+}
+Appointment* current = front;
+while(current!= NULL) {
+            if(current->appointmentID == id) {
+            int newPId, newDId;
+
+            cout<<"\n Enter New Patient ID:";
+            cin>>newPId;
+            if(cin.fail()) {
+            clearInvalidInput();
+            cout<<"\n Invalid Patient ID!\n";
+            return;
+}
+            if(doctorList!= NULL && !doctorList->isEmpty()) {
+               doctorList->displayDoctors();
+}
+            cout<<" Enter New Doctor ID:";
+            cin>>newDId;
+            if(cin.fail()) {
+            clearInvalidInput();
+            cout<<"\n Invalid Doctor ID!\n";
+            return;
+}
+Patient* pat = (patientList !=NULL) ? patientList->searchPatient(newPId) : NULL;
+if(pat== NULL) {
+            cout<<" Patient ID" << newPId <<" does not exist. Appointment not updated. \n";
+            return;
+}
+Doctor* doc =(doctorList != NULL) ? doctorList->findDoctor(newDId) : NULL;
+if(doc == NULL) {
+            cout<<"Doctor ID" << newDId << " does not exist. Appointment not updated. \n";
+            return;
+}
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout<<"Enter New Day:";
+            getline(cin, current->day);
+    
+            cout<<"Enter New Time:";
+            getline(cin, current->time);
+// Refresh snapshot fields from updated patient and doctor records
+            current->patientID = newPId;
+            current->patientName = pat->name;
+            current->patientDisease = pat->disease;
+            current->doctorID = newDId;
+            current->doctorSpecialization = doc->specialization;
+            current->fee = doc->fee;
+
+            cout<<'\n Appointment Updated Successfully!\n";
+            return;
+}
+           current= current->next;
+}
+            cout<<"\n Appointment Not Found!\n";
+}
+
+// Dequeue the front from appointment
+void deleteAppointment() {
+             if(front == NULL) {
+             cout<<"\n No Appointments Available!\n";
+             return;
+}
+   Appointment* temp = front;
+   front = front->next;
+
+   // Reset rear pointer if queue become empty
+   if(front == NULL) {
+   rear = NULL;
+   }
+
+   delete temp;
+   cout<<"\n Appointment Removed Successfully!\n";
+} 
+// Traverses and displays all queued appointments from front to rear
+void displayAppointment() const {
+if(front == NULL) {
+        cout<<"\n No Appointment Records Found! \n";
+        return;
+}
+Appointment* current = front;
+cout<<"\n ====== ALL APPOINTMENT RECORDS ==========\n";
+
+while(current!= NULL) {
+    printAppointmentRecord(current);
+    current= current-> next;
+}
+}
+};
+
+// Interactive menu for Appointment Management operations
+void appointmentModuleMenu(AppointmentManagement& appointmentSystem, PatientLinnkedList& patients, DoctorManagement& doctors) {
+     int appointmentChoice;
+
+do{
+    cout<<"\n========== APPOINTMENT MANAGEMENT=================";
+    cout<<"\n1. Insert Appointment";
+    cout<<"\n2. Search Appointment";
+    cout<<"\n3. Update Appointment";
+    cout<<"\n4. Delete Appointment";
+    cout<<"\n5. Display Appointment";
+    cout<<"\n6. Back/ Exit";
+
+    cout<<"\n Enter Choice:";
+    cin>>appointmentChoice;
+    
+   if(cin.fail()) {
+   clearInvalidInput();
+   cout<<"\n Invalid choice! Please try again.\n";
+   continue;
+}
+
+switch(appointmentChoice) {
+       case 1:
+       appointmentSystem.insertAppointment(&patients, &doctors);
+       break;
+       case 2:
+       appointmentSystem.searchAppointment();
+       break;
+       case 3:
+       appointmentSystem.updateAppointment(&patients, &doctors);
+       break;
+       case 4:
+       appointmentSystem.deleteAppointment();
+       break;
+       case 5:
+       appointmentSystem.displayAppointments();
+       break;
+       case 6:
+       cout<<"\n Exiting Appointment Management...\n";
+       break;
+       default:
+       cout<<"\n Invalid Choice! Please try again.\n";
+       break;
+       }
+       }
+       while(appointmentChoice !=6);
+}
+
+        
+
+
+
+
+
+
+
