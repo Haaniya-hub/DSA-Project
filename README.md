@@ -4,6 +4,226 @@
 
 using namespace std;
 
+struct Doctor
+{
+int doctorID;
+string name;
+string specialization;
+string contact;
+
+double fee;
+Doctor* next;
+Dotor* prev;
+
+Doctor(int id, string dName, string dSpec, string dContact, double dFee = 2500.0)
+{
+doctorID = id;
+name = dName;
+specialization = dSpec;
+contact = dContact;
+fee= dFee;
+
+next = NULL;
+prev = NULL;
+}
+};
+
+class DoctorManagement 
+{
+private:
+
+Doctor * head;
+Doctor * tail;
+int nextId;
+
+public:
+DoctorManagement()
+{
+head=NULL;
+tail=NULL;
+nextId=1;
+}
+
+bool isEmpty() const
+{
+return head == NULL;
+}
+
+Doctor* findDoctor(int id) const
+{
+Doctor* current = head;
+while(current!=NULL)
+{
+if(current->doctorID ==id)
+{
+  return current;
+  }
+  return NULL;
+  }
+
+  int insertDoctor(string name, string specialization ,string contact ,double fee = 2500.0)
+  {
+  int assignedId = nextId++;
+  Doctor* newDoctor = new Doctor(assignedId, name, specialization, contact,fee)
+
+  {
+  if (head==NULL)
+  {
+  head = tail = newDoctor;
+  }
+  else
+  {
+  tail->next = newDoctor;
+  newDoctor->prev = tail;
+  tail = newDoctor;
+  }
+  return assignedId;
+  }
+
+  bool updateDoctorById(int id, string newName, string newSpec, string newContact)
+  {
+  Doctor* target = findDoctor(id);
+  if(target == NULL)
+  {
+  return false;
+  }
+  target->name = newName;
+  target->specialization = newSpec;
+  target->contact = newContact;
+  return true;
+  }
+
+  bool updateDoctorFeeById(int id,double newFee)
+  {
+  Doctor* target = findDoctor(id);
+  if(target == NULL)
+  {
+  return false;
+  }
+
+  target->fee = newFee;
+  return true;
+}
+
+bool deleteDoctorById(int id)
+{
+if (isEmpty())
+{
+return false;
+}
+
+Doctor* current = findDoctor(id);
+if(current == NULL)
+{
+return false;
+}
+
+if(current == head && current == tail)
+{
+     head = NULL;
+     tail = NULL;
+}
+
+else if ( current == head)
+{
+ head = head->next;
+if(head != NULL)
+{ 
+  head-> prev = NULL;
+}
+}
+
+else if (current == tail)
+{
+tail = tail->prev;
+
+if (tail != NULL)
+{
+   tail->next =NULL;
+
+}
+}
+else
+{
+  current->prev->next = current->next;
+  current->next->prev = current->prev;
+}
+
+delete current;
+return true;
+}
+
+void displayDoctors() const
+{
+     if(isEmpty())
+     {
+        cout<<"\n No Doctor record found\n";
+        return;
+     }
+
+     Doctor* current = head;
+     cout<<"\n All Doctor Records\n";
+
+     while( current != NULL)
+     {
+      cout<<"\nID: "<< current->doctorID <<endl;
+      cout<<"\nName: "<< current->name <<endl;
+      cout<<"\nSpecilization: "<< current->specialization <<endl;
+      cout<<"\nContact: "<< current->contact <<endl;
+      cout<<"\n Fee: "<< current->fee <<endl;
+
+      current = current-> next;
+      }
+      }
+
+ ~DoctorManagement()
+ {
+ Doctor* current = head;
+ while( current!= NULL)
+ {
+   Doctor* temp = current;
+   current = current-> next;
+   delete temp;
+   }
+
+   head = NULL;
+   tail = NULL;
+   }
+   };
+
+namespace
+{
+void clearInvalidInput()
+{
+cin.clear();
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+}
+
+      
+      
+      
+
+      
+     
+
+
+
+
+
+
+
+
+
+  
+  
+  
+
+
+
+
+
+
 //======================================================
 //MODULE 3: PATIENT MANAGEMENT ( SINGLY LINKED LIST)
 //======================================================
